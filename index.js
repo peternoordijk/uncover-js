@@ -7,12 +7,13 @@ var pluralize = require('pluralize');
  * @return {Object}        An object containing arrays with unnested values. Example: {"books":[{"name":"Jungle Book","keywords":["test","..."]}],"animals":[{"name":"Beer"},{"name":"Wolf"}],"characters":[{"name":"Baloo"},{"name":"Akela"},{"name":"Rama"}]}
  */
 module.exports = function (arr, name) {
+  if (!name) throw new Error('You should provide a name as second argument to the uncover function, representing the root object');
   return uncover(arr, name, {});
 }
 
 // Recursive function
 function uncover (arr, name, tables) {
-  
+
   // set the value to an array, and the name to a plural version
   if (arr.constructor !== Array) {
     arr = [arr];
