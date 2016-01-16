@@ -18,7 +18,7 @@ export function showBookInformation (id) {
   .then(json => {
     dispatch({
       type: 'RECEIVE_BOOK_INFO', // this not required for this demo
-      entities: uncover(json)
+      entities: uncover(json, 'book')
     })
   })
 }
