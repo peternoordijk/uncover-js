@@ -15,10 +15,11 @@ export default function (body, name) {
  * A flexible way to convert the uncovered results into a { key -> value } map
  * @param  {object} entities uncovered entities containing arrays with values. A falsy value will make this function return null
  * @param  {string} name     the attribute of the entities which we want to map
- * @param  {function} mapper   a function to put the items into the map. Defaults to (map, item) => {map[item.id] = item}
+ * @param  {function} mapper   a function to put the items into the map. Defaults to (map, item) => {map[item.id] = item} . If the returned value is not undefined it will override the current map (to use with immutable)
+ * @param  {object} map      an object to apply the attributes to, defaults to {}
  * @return {object}          a { key -> value } map
  */
-export function toMap (entities, name, mapper = ((map, item) => { map[item.id] = item })) {
+export function toMap (entities, name, mapper = ((map, item) => { map[item.id] = item }), keymap = {}) {
   // validate input
   if (!entities) return null;
   if (!name) throw new Error('You should provide a name of the entities you want to convert when calling the toMap function');
@@ -27,9 +28,9 @@ export function toMap (entities, name, mapper = ((map, item) => { map[item.id] =
 
   // create the map
   results = results.reduce(( map, current ) => {
-    mapper(map, current);
-    return map;
-  }, {});
+    var mapperResult = mapper(map, current);
+    return mapperResult || map;
+  }, keymap);
   return results;
 }
 

@@ -2,9 +2,11 @@ Convert a nested plain JavaScript object into a normalized object without any co
 
 This is especially useful for pre processing JSON responses as it keeps primitive values such as ids intact.
 
-## Purpose
+## Usage
 
-This module was created for use in Flux or Redux. An action can for example use this module to first normalize a nested object like so:
+This module was created for use in Flux or Redux. If you don't use these libraries and you just want to create key maps you can scroll down for the example.
+
+An action can use this module to first normalize a nested object like so:
 
 ```js
 // Actions.js
@@ -22,35 +24,48 @@ export function showBookInformation (id) {
 }
 ```
 
+Now the reducers or stores can simply check for a result before actually performing the default changes
+
 ```js
 // BookReducer.js
 import { toMap } from 'uncover';
+import Immutable from 'immutable';
 
-// create a store or a reducer, doesn't really matter for this demo
-function reduce (state, action) {
-  // perform this part for all types of actions
+// create a store or a reducer, doesn't really matter for this demo. In here we
+// use immutable to create a map which is easy to merge, but of course you can
+// also use a plain JavaScript object
+function reduce (state = Immutable.Map(), action) {
+  // this part is performed for all types of actions
   var map = toMap(action.entities, 'books');
-  if (map) return map;
+  // merge and return the map if there was a result
+  if (map) return state.merge(map);
   // now continue the default actions
   switch (action.type) {
-    case 'SOME_ACTION':
-      // do something else
-      return state;
     default:
       return state;
   }
 }
+```
 
+That's all! No further configuration needed. However, if you want to change the functionality, for example to parse each item before adding them to your store, you can change the default behavior like so:
 
+```js
 // CharacterReducer.js
 import { toMap } from 'uncover';
+import Immutable from 'immutable';
+import Character from './Character';
 
 // same idea
-function reduce (state, action) {
+function reduce (state = Immutable.Map(), action) {
   // we can catch the results from the same action as we only check for the
-  // entities attribute
-  var map = toMap(action.entities, 'characters');
-  if (map) return map;
+  // entities attribute.
+  var map = toMap(action.entities, 'characters',
+    // add a custom mapping function
+    (map, item) => map.set(item.id, new Character(item)),
+    // supply an object to use as map
+    Immutable.Map()
+  );
+  if (map) return state.merge(map);
   // now continue the default actions
   switch (action.type) {
     default:
@@ -107,7 +122,7 @@ var results = uncover({
 
 ```
 
-Value of results is now:
+Value of ```results``` is now:
 
 ```js
 {
@@ -161,15 +176,19 @@ import { toMap } from 'uncover';
 
 results = toMap(results, 'characters',
   // this argument is optional, in here we show the default
-  // function mapping the values by 'id'
+  // function mapping the values by 'id'. If this function returns an object
+  // then this object will override the current map
   (map, item) => {
     map[item.id] = item
-  }
+  },
+  // this argument is also optional, this object is the map on which the
+  // items will be applied to
+  {}
 )
 
 ```
 
-Results now contains the following map:
+The value ```results``` now contains the following map:
 
 ```js
 {
