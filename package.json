@@ -1,0 +1,32 @@
+{
+  "name": "uncover",
+  "version": "1.0.0",
+  "description": "Convert a nested plain JavaScript object into a normalized object.",
+  "main": "index.js",
+  "scripts": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/peternoordijk/uncover-js.git"
+  },
+  "keywords": [
+    "normalize",
+    "convert",
+    "nested",
+    "object",
+    "array",
+    "entity",
+    "entities",
+    "uncover",
+    "json"
+  ],
+  "author": "Peter Noordijk",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/peternoordijk/uncover-js/issues"
+  },
+  "homepage": "https://github.com/peternoordijk/uncover-js#readme",
+  "dependencies": {
+    "pluralize": "^1.2.1"
+  }
+}
