@@ -1,6 +1,6 @@
 {
   "name": "uncover",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Convert a nested plain JavaScript object into a normalized object.",
   "main": "index.js",
   "scripts": {
@@ -28,5 +28,6 @@
   "homepage": "https://github.com/peternoordijk/uncover-js#readme",
   "dependencies": {
     "pluralize": "^1.2.1"
-  }
+  },
+  "devDependencies": {}
 }
