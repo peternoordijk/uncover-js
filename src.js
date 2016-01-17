@@ -3,20 +3,19 @@ var pluralize = require('pluralize');
 /**
  * Uncover the given plain JS object, normalizing nested values
  * @param  {Array|object} body    A nested object or array. Example: {"name":"Jungle Book","keywords":["test","..."],"animals":[{"name":"Beer","character":{"name":"Baloo"}},{"name":"Wolf","characters":[{"name":"Akela"},{"name":"Rama"}]}]}
- * @param  {String} name   The name which you want to call the root object. Example: "book"
+ * @param  {String} name   The name which you want to call the root object. Example: "book". Defaults to '_root'
  * @return {Object}        An object containing arrays with unnested values. Example: {"books":[{"name":"Jungle Book","keywords":["test","..."]}],"animals":[{"name":"Beer"},{"name":"Wolf"}],"characters":[{"name":"Baloo"},{"name":"Akela"},{"name":"Rama"}]}
  */
-export default function (body, name) {
-  if (!name) throw new Error('You should provide a name as second argument to the uncover function, representing the root object');
+export default function (body, name = '_root') {
   return uncover(body, name, {});
 }
 
 /**
  * A flexible way to convert the uncovered results into a { key -> value } map
  * @param  {object} entities uncovered entities containing arrays with values. A falsy value will make this function return null
- * @param  {string} name     the attribute of the entities which we want to map
+ * @param  {string} name     the attribute of the entities which we want to map.
  * @param  {function} mapper   a function to put the items into the map. Defaults to (map, item) => {map[item.id] = item} . If the returned value is not undefined it will override the current map (to use with immutable)
- * @param  {object} map      an object to apply the attributes to, defaults to {}
+ * @param  {object} map      an object to apply the attributes to. If this is a function, the function will be called and the result will be used as map. Defaults to {}
  * @return {object}          a { key -> value } map
  */
 export function toMap (entities, name, mapper = ((map, item) => { map[item.id] = item }), keymap = {}) {
@@ -30,7 +29,7 @@ export function toMap (entities, name, mapper = ((map, item) => { map[item.id] =
   results = results.reduce(( map, current ) => {
     var mapperResult = mapper(map, current);
     return mapperResult || map;
-  }, keymap);
+  }, (typeof keymap === 'function' ? keymap() : keymap));
   return results;
 }
 
@@ -57,10 +56,10 @@ function uncover (body, name, tables) {
         var val = obj[attr];
 
         // Objects are always nested objects
-        if (val.constructor === Object) {
+        if (val && val.constructor === Object) {
           uncover(val, attr, tables);
         // Arrays might contain numbers or strings instead of nested objects
-        } else if (val.constructor === Array) {
+        } else if (val && val.constructor === Array) {
           if (val.length) {
             if (val[0].constructor === Object) {
               uncover(val, attr, tables);
@@ -82,4 +81,4 @@ function uncover (body, name, tables) {
     table.push(result);
   }
   return tables;
-};
+}

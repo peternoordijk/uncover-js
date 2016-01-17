@@ -1,7 +1,7 @@
 {
   "name": "uncover",
-  "version": "1.0.4",
-  "description": "Convert a nested plain JavaScript object into a normalized object.",
+  "version": "1.0.5",
+  "description": "Convert a nested plain JavaScript object into a normalized object without any configuration .",
   "main": "index.js",
   "scripts": {
   },

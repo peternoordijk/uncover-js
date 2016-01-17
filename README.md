@@ -1,10 +1,16 @@
 Convert a nested plain JavaScript object into a normalized object without any configuration. Use this library to create { key -> value } maps.
 
-This is especially useful for pre processing JSON responses as it keeps primitive values such as ids intact.
+This is especially useful for pre processing JSON responses as it keeps primitive values such as integers and strings intact.
+
+## Installation
+
+```
+npm i --save uncover
+```
 
 ## Usage
 
-This module was created for use in Flux or Redux. If you don't use these libraries and you just want to create key maps you can scroll down for the example.
+This module was created for use in Flux or Redux. If you don't use these libraries and you just want to create key maps you can scroll down for the detailed example.
 
 An action can use this module to first normalize a nested object like so:
 
@@ -17,7 +23,9 @@ export function showBookInformation (id) {
   getJSON(`/api/books/${id}`)
   .then(json => {
     dispatch({
-      type: 'RECEIVE_BOOK_INFO', // this not required for this demo
+      type: 'RECEIVE_BOOK_INFO',
+      // This is where the magic happens: the first parameter takes the nested
+      // value, the second one is the name of the root type.
       entities: uncover(json, 'book')
     })
   })
@@ -29,16 +37,14 @@ Now the reducers or stores can simply check for a result before actually perform
 ```js
 // BookReducer.js
 import { toMap } from 'uncover';
-import Immutable from 'immutable';
 
-// create a store or a reducer, doesn't really matter for this demo. In here we
-// use immutable to create a map which is easy to merge, but of course you can
-// also use a plain JavaScript object
-function reduce (state = Immutable.Map(), action) {
-  // this part is performed for all types of actions
+// create a store or a reducer, doesn't really matter for this demo.
+export function (state = {}, action) {
+  // this part is performed for all types of actions, so all uncovered 'books'
+  // results from any action will always be processed
   var map = toMap(action.entities, 'books');
   // merge and return the map if there was a result
-  if (map) return state.merge(map);
+  if (map) return Object.assign({}, state, map);
   // now continue the default actions
   switch (action.type) {
     default:
@@ -47,34 +53,11 @@ function reduce (state = Immutable.Map(), action) {
 }
 ```
 
-That's all! No further configuration needed. However, if you want to change the functionality, for example to parse each item before adding them to your store, you can change the default behavior like so:
+That's all! No further configuration needed.
 
-```js
-// CharacterReducer.js
-import { toMap } from 'uncover';
-import Immutable from 'immutable';
-import Character from './Character';
+For more options like parsing results, creating initial data or integration with the Immutable library you can [see this page](https://github.com/peternoordijk/uncover-js/wiki/Advanced-usage-with-Flux---Redux).
 
-// same idea
-function reduce (state = Immutable.Map(), action) {
-  // we can catch the results from the same action as we only check for the
-  // entities attribute.
-  var map = toMap(action.entities, 'characters',
-    // add a custom mapping function
-    (map, item) => map.set(item.id, new Character(item)),
-    // supply an object to use as map
-    Immutable.Map()
-  );
-  if (map) return state.merge(map);
-  // now continue the default actions
-  switch (action.type) {
-    default:
-      return state;
-  }
-}
-```
-
-## Example
+## Detailed example
 
 Let's start with our nested value
 
@@ -93,7 +76,7 @@ var results = uncover({
       {
          "id": 1,
          "bookId": 1,
-         "name": "Beer",
+         "name": "Bear",
          "character": {
             "id": 1,
             "animalId": 1,
@@ -122,7 +105,7 @@ var results = uncover({
 
 ```
 
-Value of ```results``` is now:
+After calling the ```uncover``` function the value of ```results``` will be:
 
 ```js
 {
@@ -140,7 +123,7 @@ Value of ```results``` is now:
       {
          "id": 1,
          "bookId": 1,
-         "name": "Beer"
+         "name": "Bear"
       },
       {
          "id": 2,
@@ -182,7 +165,8 @@ results = toMap(results, 'characters',
     map[item.id] = item
   },
   // this argument is also optional, this object is the map on which the
-  // items will be applied to
+  // items will be applied to. If this is a function, the function will be
+  // called and the result will be used as map.
   {}
 )
 
